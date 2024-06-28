@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "z1yDSgkSQr0oSC8W0+bIhTC0WCh2cmrdyub44oQMayzgiaTfuqCj1IZEJ1n5l5+Du/3xjg5mrriPJ5gBhRxicw==",
+  "dgSpecHash": "iC6cNWgD6SJIOciTI0PlTuXysktXW6es/wX/f9SpTiuxGzINsAzXhUl1JAPpipgLAmBGMOgXpji3IK1mDf7MRA==",
   "success": true,
   "projectFilePath": "C:\\InnoClinic\\InnoClinic\\Officies.API\\Officies.API.csproj",
   "expectedPackageFiles": [
@@ -8,9 +8,9 @@
     "C:\\Users\\Егор\\.nuget\\packages\\awssdk.securitytoken\\3.7.100.14\\awssdk.securitytoken.3.7.100.14.nupkg.sha512",
     "C:\\Users\\Егор\\.nuget\\packages\\dnsclient\\1.6.1\\dnsclient.1.6.1.nupkg.sha512",
     "C:\\Users\\Егор\\.nuget\\packages\\erroror\\2.0.1\\erroror.2.0.1.nupkg.sha512",
-    "C:\\Users\\Егор\\.nuget\\packages\\fluentvalidation\\11.5.1\\fluentvalidation.11.5.1.nupkg.sha512",
+    "C:\\Users\\Егор\\.nuget\\packages\\fluentvalidation\\11.9.2\\fluentvalidation.11.9.2.nupkg.sha512",
     "C:\\Users\\Егор\\.nuget\\packages\\fluentvalidation.aspnetcore\\11.3.0\\fluentvalidation.aspnetcore.11.3.0.nupkg.sha512",
-    "C:\\Users\\Егор\\.nuget\\packages\\fluentvalidation.dependencyinjectionextensions\\11.5.1\\fluentvalidation.dependencyinjectionextensions.11.5.1.nupkg.sha512",
+    "C:\\Users\\Егор\\.nuget\\packages\\fluentvalidation.dependencyinjectionextensions\\11.9.2\\fluentvalidation.dependencyinjectionextensions.11.9.2.nupkg.sha512",
     "C:\\Users\\Егор\\.nuget\\packages\\mapster\\7.4.0\\mapster.7.4.0.nupkg.sha512",
     "C:\\Users\\Егор\\.nuget\\packages\\mapster.core\\1.2.1\\mapster.core.1.2.1.nupkg.sha512",
     "C:\\Users\\Егор\\.nuget\\packages\\mapster.dependencyinjection\\1.0.1\\mapster.dependencyinjection.1.0.1.nupkg.sha512",

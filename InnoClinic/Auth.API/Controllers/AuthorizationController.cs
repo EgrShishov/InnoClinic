@@ -1,5 +1,8 @@
 ﻿using Auth.API.Exrtensions;
-using Auth.Application.Commands;
+using Auth.Application.Commands.Refresh;
+using Auth.Application.Commands.SignIn;
+using Auth.Application.Commands.SignUp;
+using Auth.Application.Commands.VerifyEmail;
 using Auth.Domain.Entities;
 using InnoClinic.Contracts.Authentication.Requests;
 using InnoClinic.Contracts.Authentication.Responses;
@@ -11,8 +14,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Auth.API.Controllers
 {
     [Route("api/[controller]")]
-    [ApiController]
-    public class AuthorizationController : ControllerBase
+    public class AuthorizationController : ApiController
     {
         private readonly IMediator _mediator;
         private readonly IMapper _mapper;
@@ -38,7 +40,7 @@ namespace Auth.API.Controllers
                     Response.Cookies.Append("refresh", response.refreshToken);
                     return Ok(_mapper.Map<AuthorizationResponse>(response));
                 },
-                errors => Problem(errors[0].ToString()));
+                errors => Problem(errors));
         }
 
         [HttpGet("SignUp")]
@@ -54,7 +56,7 @@ namespace Auth.API.Controllers
                     Response.Cookies.Append("refresh", response.refreshToken);
                     return Ok(_mapper.Map<AuthorizationResponse>(response));
                 },
-                errors => Problem(errors[0].ToString()));
+                errors => Problem(errors));
         }
 
         [HttpGet("Sign-out")]
@@ -91,7 +93,17 @@ namespace Auth.API.Controllers
                     Response.Cookies.Append("access", response.accessToken);
                     return Ok(_mapper.Map<AuthorizationResponse>(response));
                 },
-                errors => Problem(errors[0].ToString()));
+                errors => Problem(errors));
+        }
+
+        [HttpGet("verify")]
+        public async Task<IActionResult> VerifyEmail(string link)
+        {
+            var verificationResult = await _mediator.Send(new VerifyEmailCommand(link));
+
+            return verificationResult.Match(
+                response => Ok(response),
+                errors => Problem(errors));
         }
     }
 }

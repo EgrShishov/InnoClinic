@@ -1,8 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "9b9TpvFLw0qrQjR6ZoISBYm1IGuAwoEmlj8fTJHFjxYYaogo1UF93EVeR/BNFmtIKscmTvoLb7I9abDo6F4Ivg==",
+  "dgSpecHash": "IP1Mf6yyZIwS9MpmlGUfbDcubhbrQ6qfJx6kkL+mR0BweRMlGhx5x9Cu6OZTgYjySIfEwdANG0evCvjXnGUz6g==",
   "success": true,
   "projectFilePath": "C:\\InnoClinic\\InnoClinic\\Officies.Domain\\Officies.Domain.csproj",
-  "expectedPackageFiles": [],
+  "expectedPackageFiles": [
+    "C:\\Users\\Егор\\.nuget\\packages\\erroror\\2.0.1\\erroror.2.0.1.nupkg.sha512"
+  ],
   "logs": []
 }
