@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "o2T75DzrF8EbrzTRILIA4+AeOA2SAguFE7Gqbc0Bf9Ce7T9kabSKn6eBLCsDoyQ4ZDsa3MN91psMZ9QfucbzXg==",
+  "dgSpecHash": "Dc0xKrkAZ6VJHFgmRLOYRkuFEJLYKLvuqqFAzQInGGxJAL6D2RbrdpRdFW9HNslNFAhasd1BysJ9ZIG4Ii/4mg==",
   "success": true,
   "projectFilePath": "C:\\InnoClinic\\InnoClinic\\Officies.Infrastructure\\Officies.Infrastructure.csproj",
   "expectedPackageFiles": [
@@ -8,9 +8,9 @@
     "C:\\Users\\Егор\\.nuget\\packages\\awssdk.securitytoken\\3.7.100.14\\awssdk.securitytoken.3.7.100.14.nupkg.sha512",
     "C:\\Users\\Егор\\.nuget\\packages\\dnsclient\\1.6.1\\dnsclient.1.6.1.nupkg.sha512",
     "C:\\Users\\Егор\\.nuget\\packages\\erroror\\2.0.1\\erroror.2.0.1.nupkg.sha512",
-    "C:\\Users\\Егор\\.nuget\\packages\\fluentvalidation\\11.5.1\\fluentvalidation.11.5.1.nupkg.sha512",
+    "C:\\Users\\Егор\\.nuget\\packages\\fluentvalidation\\11.9.2\\fluentvalidation.11.9.2.nupkg.sha512",
     "C:\\Users\\Егор\\.nuget\\packages\\fluentvalidation.aspnetcore\\11.3.0\\fluentvalidation.aspnetcore.11.3.0.nupkg.sha512",
-    "C:\\Users\\Егор\\.nuget\\packages\\fluentvalidation.dependencyinjectionextensions\\11.5.1\\fluentvalidation.dependencyinjectionextensions.11.5.1.nupkg.sha512",
+    "C:\\Users\\Егор\\.nuget\\packages\\fluentvalidation.dependencyinjectionextensions\\11.9.2\\fluentvalidation.dependencyinjectionextensions.11.9.2.nupkg.sha512",
     "C:\\Users\\Егор\\.nuget\\packages\\mediatr\\12.3.0\\mediatr.12.3.0.nupkg.sha512",
     "C:\\Users\\Егор\\.nuget\\packages\\mediatr.contracts\\2.0.1\\mediatr.contracts.2.0.1.nupkg.sha512",
     "C:\\Users\\Егор\\.nuget\\packages\\microsoft.extensions.dependencyinjection.abstractions\\8.0.0\\microsoft.extensions.dependencyinjection.abstractions.8.0.0.nupkg.sha512",

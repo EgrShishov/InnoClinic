@@ -1,6 +1,5 @@
 ﻿using FluentValidation.AspNetCore;
 using Microsoft.Extensions.DependencyInjection;
-using Officies.Application.Validator;
 
 namespace Officies.Application
 {
@@ -15,7 +14,7 @@ namespace Officies.Application
 
         public static IServiceCollection AddValidation(this IServiceCollection services)
         {
-            services.AddValidatorsFromAssemblyContaining<OfficeValidator>();
+            services.AddValidatorsFromAssembly(typeof(DependencyInjection).Assembly);
             services.AddFluentValidationAutoValidation();
 
             return services;

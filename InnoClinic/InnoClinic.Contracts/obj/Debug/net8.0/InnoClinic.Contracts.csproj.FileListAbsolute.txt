@@ -1,0 +1,12 @@
+C:\InnoClinic\InnoClinic\InnoClinic.Contracts\bin\Debug\net8.0\InnoClinic.Contracts.deps.json
+C:\InnoClinic\InnoClinic\InnoClinic.Contracts\bin\Debug\net8.0\InnoClinic.Contracts.dll
+C:\InnoClinic\InnoClinic\InnoClinic.Contracts\bin\Debug\net8.0\InnoClinic.Contracts.pdb
+C:\InnoClinic\InnoClinic\InnoClinic.Contracts\obj\Debug\net8.0\InnoClinic.Contracts.GeneratedMSBuildEditorConfig.editorconfig
+C:\InnoClinic\InnoClinic\InnoClinic.Contracts\obj\Debug\net8.0\InnoClinic.Contracts.AssemblyInfoInputs.cache
+C:\InnoClinic\InnoClinic\InnoClinic.Contracts\obj\Debug\net8.0\InnoClinic.Contracts.AssemblyInfo.cs
+C:\InnoClinic\InnoClinic\InnoClinic.Contracts\obj\Debug\net8.0\InnoClinic.Contracts.csproj.CoreCompileInputs.cache
+C:\InnoClinic\InnoClinic\InnoClinic.Contracts\obj\Debug\net8.0\InnoClinic.Contracts.sourcelink.json
+C:\InnoClinic\InnoClinic\InnoClinic.Contracts\obj\Debug\net8.0\InnoClinic.Contracts.dll
+C:\InnoClinic\InnoClinic\InnoClinic.Contracts\obj\Debug\net8.0\refint\InnoClinic.Contracts.dll
+C:\InnoClinic\InnoClinic\InnoClinic.Contracts\obj\Debug\net8.0\InnoClinic.Contracts.pdb
+C:\InnoClinic\InnoClinic\InnoClinic.Contracts\obj\Debug\net8.0\ref\InnoClinic.Contracts.dll

@@ -1,12 +1,13 @@
 {
   "version": 2,
-  "dgSpecHash": "lhC16iO4D4f/WLd9sWYpTIt/80+BOAgFDi0B93i8arY6lSj92j49G59S5DDE6300Re30DyW6vyx18IO1633huw==",
+  "dgSpecHash": "udw5ELFrho++jGrf2RVSJyJYQUHoLnJDRo9bbNiuQJQdRFapbDfwfsWJbrBuLTUkZ4s14q7hqbOmZHYEvrNkIA==",
   "success": true,
   "projectFilePath": "C:\\InnoClinic\\InnoClinic\\Auth.Application\\Auth.Application.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Егор\\.nuget\\packages\\entityframework\\6.1.0\\entityframework.6.1.0.nupkg.sha512",
     "C:\\Users\\Егор\\.nuget\\packages\\erroror\\2.0.1\\erroror.2.0.1.nupkg.sha512",
     "C:\\Users\\Егор\\.nuget\\packages\\fluentvalidation\\11.9.2\\fluentvalidation.11.9.2.nupkg.sha512",
+    "C:\\Users\\Егор\\.nuget\\packages\\fluentvalidation.dependencyinjectionextensions\\11.9.2\\fluentvalidation.dependencyinjectionextensions.11.9.2.nupkg.sha512",
     "C:\\Users\\Егор\\.nuget\\packages\\mapster\\7.4.0\\mapster.7.4.0.nupkg.sha512",
     "C:\\Users\\Егор\\.nuget\\packages\\mapster.core\\1.2.1\\mapster.core.1.2.1.nupkg.sha512",
     "C:\\Users\\Егор\\.nuget\\packages\\mediatr\\12.3.0\\mediatr.12.3.0.nupkg.sha512",

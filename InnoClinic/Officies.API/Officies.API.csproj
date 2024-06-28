@@ -7,7 +7,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Mapster" Version="7.4.0" />
+    <PackageReference Include="Mapster.DependencyInjection" Version="1.0.1" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\InnoClinic.Contracts\InnoClinic.Contracts.csproj" />
+    <ProjectReference Include="..\Officies.Infrastructure\Officies.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>
