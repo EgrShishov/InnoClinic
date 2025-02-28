@@ -1,12 +1,15 @@
-﻿public record UpdateDoctorRequest(
-    int DoctorProfileId,
-    byte[] Photo,
-    string FirstName,
-    string LastName,
-    string MiddleName,
-    DateTime DateOfBirth,
-    string Email,
-    int SpecializationId,
-    int OfficeId,
-    DateTime CareerStartYear,
-    string Status);
+﻿using Microsoft.AspNetCore.Http;
+
+public class UpdateDoctorRequest
+{
+    public IFormFile Photo { get; init; }
+    public string FirstName {  get; init; }
+    public string LastName { get; init; }
+    public string MiddleName {  get; init; }
+    public DateTime DateOfBirth {  get; init; }
+    public string Email {  get; init; }
+    public int SpecializationId {  get; init; }
+    public string OfficeId {  get; init; }
+    public int CareerStartYear {  get; init; }
+    public ProfileStatus Status {  get; init; }
+}

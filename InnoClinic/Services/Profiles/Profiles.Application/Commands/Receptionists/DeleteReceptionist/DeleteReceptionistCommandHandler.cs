@@ -11,7 +11,7 @@
 
                 if (receptionist is null)
                 {
-                    return Errors.Receptionists.NotFound;
+                    return Errors.Receptionists.NotFound(request.ReceptionistId);
                 }
 
                 await unitOfWork.ReceptionistsRepository.DeleteReceptionistAsync(request.ReceptionistId);

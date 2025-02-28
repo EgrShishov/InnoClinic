@@ -2,7 +2,7 @@
     string FirstName,
     string LastName,
     string MiddleName,
-    byte[] Photo,
+    string PhotoUrl,
     string Specialization,
     int Experience,
     string City,

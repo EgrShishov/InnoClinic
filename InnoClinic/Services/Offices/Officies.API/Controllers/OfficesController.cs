@@ -1,60 +1,95 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
-[Route("api/[controller]")]
 public class OfficesController : ApiController
 {
-private readonly IMediator _mediator;
-private readonly IMapper _mapper;
+    private readonly IMediator _mediator;
+    private readonly IMapper _mapper;
 
-public OfficesController(IMediator mediator, IMapper mapper)
-{
-    _mediator = mediator;
-    _mapper = mapper;
-}
-
-[HttpGet("all")]
-public async Task<ActionResult<IEnumerable<OfficeResponse>>> GetOffices()
-{
-    var offices = await _mediator.Send(new GetOfficesQuery());
-    var response = offices.Adapt<IEnumerable<OfficeResponse>>();
-    return Ok(response);
-}
-        
-[HttpGet("{id}")]
-public async Task<ActionResult<OfficeResponse>> GetOffice(string id)
-{
-    var office = await _mediator.Send(new GetOfficeByIdQuery(id));
-    if (office == null)
+    public OfficesController(IMediator mediator, IMapper mapper)
     {
-        return NotFound();
+        _mediator = mediator;
+        _mapper = mapper;
     }
-    var response = office.Adapt<OfficeResponse>();
-    return Ok(response);
-}
 
-[HttpPost("create")]
-public async Task<ActionResult<OfficeResponse>> CreateOffice(CreateOfficeRequest request)
-{
-    var office = request.Adapt<Office>();
-    await _mediator.Send(new CreateOfficeCommand(office));
-    var response = office.Adapt<OfficeResponse>();
-    return CreatedAtAction(nameof(GetOffice), new { id = office.Id }, response);
-}
+    [HttpGet("all")]
+    public async Task<IActionResult> GetOffices()
+    {
+        var response = await _mediator.Send(new GetOfficesQuery());
 
-[HttpPut("{id}")]
-public async Task<IActionResult> UpdateOffice(string id, UpdateOfficeRequest request)
-{
-    var office = request.Adapt<Office>();
-    office.Id = id;
+        return response.Match(
+            value => Ok(value),
+            errors => Problem(errors));
+    }
+        
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetOffice(string id)
+    {
+        var response = await _mediator.Send(new GetOfficeByIdQuery(id));
 
-    await _mediator.Send(new UpdateOfficeCommand(office));
-    return NoContent();
-}
+        return response.Match(
+            value => Ok(value),
+            errors => Problem(errors));
+    }
 
-[HttpDelete("{id}")]
-public async Task<IActionResult> DeleteOffice(string id)
-{
-    await _mediator.Send(new DeleteOfficeCommand(id));
-    return NoContent();
-}
+    [HttpPost("create")]
+    [Authorize(Roles = "Receptionist")]
+    public async Task<IActionResult> CreateOffice(CreateOfficeRequest request)
+    {
+        var response = await _mediator.Send(
+            new CreateOfficeCommand(
+                request.City, 
+                request.Street, 
+                request.HouseNumber,
+                request.OfficeNumber, 
+                request.Photo, 
+                request.RegistryPhoneNumber, 
+                request.IsActive));
+
+        return response.Match(
+            value => Ok(value),
+            errors => Problem(errors));
+    }
+
+    [HttpPut("{id}")]
+    [Authorize(Roles = "Receptionist")]
+    public async Task<IActionResult> UpdateOffice(string id, UpdateOfficeRequest request)
+    {
+        var response = await _mediator.Send(
+           new UpdateOfficeCommand(
+               id,
+               request.City,
+               request.Street,
+               request.HouseNumber,
+               request.OfficeNumber,
+               request.Photo,
+               request.RegistryPhoneNumber,
+               request.IsActive));
+
+        return response.Match(
+            value => Ok(value),
+            errors => Problem(errors));
+    }
+
+    [HttpPut("change-status/{id}")]
+    [Authorize(Roles = "Receptionist")]
+    public async Task<IActionResult> UpdateOfficesStatus(string id, bool IsActive)
+    {
+        var result = await _mediator.Send(new ChangeOfficesStatusCommand(id, IsActive));
+
+        return result.Match(
+            _ => Ok(),
+            errors => Problem(errors));
+    }
+
+    [HttpDelete("{id}")]
+    [Authorize(Roles = "Receptionist")]
+    public async Task<IActionResult> DeleteOffice(string id)
+    {
+        var result = await _mediator.Send(new DeleteOfficeCommand(id));
+
+        return result.Match(
+            _ => NoContent(),
+            errors => Problem(errors));
+    }
 }

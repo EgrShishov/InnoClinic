@@ -1,6 +1,8 @@
-﻿public class Office
+﻿using MongoDB.Bson;
+
+public class Office
 {
-    public string Id { get; set; }
+    public ObjectId Id { get; set; }
     public string Address => $"{City}, {Street}, {HouseNumber}, {OfficeNumber}";
     public string City { get; set; }
     public string Street { get; set; }

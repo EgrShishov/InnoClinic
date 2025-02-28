@@ -1,9 +1,7 @@
 ﻿public sealed record CreateAppointmentsResultCommand(
-    DateTime? AppointmentDate,
+    int AppointmentId,
     int PatientId,
-    DateTime? DateofBirth,
     int DoctorId,
-    int SpecializationId,
     int ServiceId,
     string Complaints,
     string Conclusion,

@@ -8,9 +8,8 @@ public class SqlConnectionFactory : ISqlConnectionFactory
         _configuration = configuration;
     }
 
-    public SqlConnection CreateConnection()
+    public NpgsqlConnection CreateConnection()
     {
-        return new SqlConnection(
-            _configuration.GetConnectionString("ServicesDatabase"));
+        return new NpgsqlConnection(_configuration.GetConnectionString("ServicesDb"));
     }
 }

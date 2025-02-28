@@ -1,3 +1,3 @@
-﻿public record VerifyEmailCommand(string Link) : IRequest<ErrorOr<Unit>> 
+﻿public record VerifyEmailCommand(int AccountId, string Link) : IRequest<ErrorOr<Unit>> 
 {
 }

@@ -9,14 +9,14 @@
         _mapper = mapper;
     }
 
-    [HttpGet("schedule/{id:int}")]
+    [HttpGet("schedule/{doctorId:int}")]
     [Authorize(Roles = "Doctor")]
-    public async Task<IActionResult> GetAppointmentSchedule(int id, DateTime appointmentDate)
+    public async Task<IActionResult> GetAppointmentSchedule(int doctorId, DateTime appointmentDate)
     {
-        var result = await _mediator.Send(new ViewAppointmentScheduleQuery(id, appointmentDate));
+        var result = await _mediator.Send(new ViewAppointmentScheduleQuery(doctorId, appointmentDate));
 
         return result.Match(
-            schedule => Ok(_mapper.Map<List<AppointmentHistoryResponse>>(schedule)),
+            schedule => Ok(schedule),
             errors => Problem(errors));
     }
 
@@ -26,14 +26,14 @@
         DateTime? appointmentDate, 
         int? doctorId, 
         int? serviceId, 
-        bool appointmentStatus,
-        int? officeId)
+        bool isActive)
     {
-        var command = _mapper.Map<ViewAppointmentsListQuery>((appointmentDate, doctorId, serviceId, appointmentStatus, officeId));
+        var command = new ViewAppointmentsListQuery(appointmentDate, doctorId, serviceId, isActive);
+        
         var result = await _mediator.Send(command);
 
         return result.Match(
-            list => Ok(_mapper.Map<List<AppointmentHistoryResponse>>(list)),
+            list => Ok(list),
             errors => Problem(errors));
     }
 
@@ -44,19 +44,27 @@
         var result = await _mediator.Send(new ViewAppointmentsHistoryQuery(id));
 
         return result.Match(
-            history => Ok(_mapper.Map<List<AppointmentHistoryResponse>>(history)),
+            history => Ok(history),
             errors => Problem(errors));
     }
 
-    [HttpPost("create-appointment")]
+    [HttpPost("create")]
     [Authorize(Roles = "Patient, Receptionist")]
     public async Task<IActionResult> CreateAppointment(CreateAppointmentRequest request)
     {
-        var command = _mapper.Map<CreateAppointmentCommand>(request);
+        var command = new CreateAppointmentCommand(
+            request.PatientId,
+            request.SpecializationId,
+            request.DoctorId,
+            request.ServiceId,
+            request.OfficeId,
+            request.AppointmentDate,
+            request.TimeSlot);
+
         var result = await _mediator.Send(command);
 
         return result.Match(
-            appointment => Ok(_mapper.Map<AppointmentHistoryResponse>(appointment)),
+            appointment => Ok(appointment),
             errors => Problem(errors));
     }
 
@@ -65,6 +73,7 @@
     public async Task<IActionResult> ApproveAppointment(int id)
     {
         var result = await _mediator.Send(new ApproveAppointmentCommand(id));
+        
         return result.Match(
             value => Ok(value),
             errors => Problem(errors));
@@ -75,28 +84,42 @@
     public async Task<IActionResult> CancelAppointment(int id)
     {
         var result = await _mediator.Send(new CancelAppointmentCommand(id));
+
         return result.Match(
             value => Ok(value),
             errors => Problem(errors));
     }
 
-    [HttpPost("select-slots")]
+    [HttpGet("time-slots")]
     [Authorize(Roles = "Receptionist, Patient")]
-    public async Task<IActionResult> SelectDateAndTimeSlot(DateTime appointmentDate, TimeSpan appointmentTime)
+    public async Task<IActionResult> ViewTimeSlots(int ServiceId, int DoctorId, DateTime AppointmentDate)
     {
-        throw new NotImplementedException();
+        var command = new ViewTimeSlotsQuery(
+            ServiceId,
+            DoctorId, 
+            AppointmentDate);
+
+        var result = await _mediator.Send(command);
+
+        return result.Match(
+            slots => Ok(slots),
+            errors => Problem(errors));
     }
 
     [HttpPut("reschedule/{id:int}")]
     [Authorize(Roles = "Receptionist, Patient")]
-    public async Task<IActionResult> RescheduleAppointment(int id, int doctorId, DateTime appointmentDate, TimeSpan appointmentTime)
+    public async Task<IActionResult> RescheduleAppointment(int appointmentId, RescheduleAppointmentRequest request)
     {
-        var command = _mapper.Map<RescheduleAppointmentCommand>((id, doctorId, appointmentDate, appointmentTime));
+        var command = new RescheduleAppointmentCommand(
+            appointmentId, 
+            request.DoctorId, 
+            request.NewAppointmentDate, 
+            request.NewAppointmentTime);
+
         var result = await _mediator.Send(command);
+
         return result.Match(
-            rescheduledAppointment => Ok(_mapper.Map<AppointmentHistoryResponse>(rescheduledAppointment)),
+            rescheduledAppointment => Ok(rescheduledAppointment),
             errors => Problem(errors));
     }
-
-
 }

@@ -1,68 +1,71 @@
-﻿using MongoDB.Driver;
+﻿using Microsoft.EntityFrameworkCore.Storage;
 
 public class UnitOfWork : IUnitOfWork
 {
-    private readonly MongoClient _client;
+    private readonly OfficesDbContext _dbContext;
+    private IDbContextTransaction _transaction;
     private Lazy<IOfficeRepository> _officeRepository;
-    private IClientSessionHandle _session;
 
-    public UnitOfWork(MongoClient client)
+    public UnitOfWork(OfficesDbContext dbContext)
     {
-        _client = client;
-        _officeRepository = new(() => new OfficeRepository(_client));
+        _dbContext = dbContext;
+        _officeRepository = new(() => new OfficeRepository(_dbContext));
     }
 
     public IOfficeRepository OfficeRepository => _officeRepository.Value;
-    public IClientSessionHandle Session => _session;
 
+    public async Task SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
     public async Task BeginTransactionAsync(CancellationToken cancellationToken = default)
     {
-        _session = await _client.StartSessionAsync(cancellationToken: cancellationToken);
-        _session.StartTransaction();
+        _transaction = await _dbContext.Database.BeginTransactionAsync(cancellationToken);
     }
 
     public async Task CommitTransactionAsync(CancellationToken cancellationToken = default)
     {
-        if(_session == null)
+        if(_transaction == null)
         {
             throw new InvalidOperationException("Transaction has not been started");
         }
 
         try
         {
-            await _session.CommitTransactionAsync(cancellationToken: cancellationToken);
+            await _transaction.CommitAsync(cancellationToken);
         }
         catch
         {
-            await _session.AbortTransactionAsync(cancellationToken: cancellationToken);
+            await _transaction.RollbackAsync(cancellationToken);
             throw;
         }
         finally
         {
-            _session.Dispose();
-            _session = null;
+            _transaction.Dispose();
+            _transaction = null;
         }
     }
     public async Task RollbackTransactionAsync(CancellationToken cancellationToken = default)
     {
-        if (_session == null)
+        if (_transaction == null)
         {
             throw new InvalidOperationException("Transaction has not been started");
         }
 
         try
         {
-            await _session.AbortTransactionAsync(cancellationToken);
+            await _transaction.RollbackAsync(cancellationToken);
         }
         finally
         {
-            _session.Dispose();
-            _session = null;
+            _transaction.Dispose();
+            _transaction = null;
         }
     }
 
     public void Dispose()
     {
-        _session?.Dispose();
+        _transaction?.Dispose();
+        GC.SuppressFinalize(this);
     }
 }

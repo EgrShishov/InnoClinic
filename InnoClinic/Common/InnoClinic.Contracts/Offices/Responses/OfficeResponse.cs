@@ -1,6 +1,8 @@
-﻿public record OfficeResponse(
-    string Id,
-    string Address,
-    string PhotoId,
-    string RegistryPhoneNumber,
-    bool IsActive);
+﻿public class OfficeResponse
+{
+    public string Id { get; init; }
+    public string Address {  get; init; }
+    public string PhotoUrl {  get; init; }
+    public string RegistryPhoneNumber {  get; init; }
+    public bool IsActive {  get; init; }
+}

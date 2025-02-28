@@ -1,2 +1,4 @@
-﻿global using Officies.Domain.Abstractions;
-global using Officies.Domain.Entities;
+﻿global using MassTransit;
+global using ErrorOr;
+global using MediatR;
+global using MongoDB.Driver;

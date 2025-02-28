@@ -1,36 +1,58 @@
-﻿public class ViewAppointmentScheduleQueryHandler(IUnitOfWork unitOfWork, IProfileService profileService, IServiceService servicesService)
+﻿public class ViewAppointmentScheduleQueryHandler(
+    IUnitOfWork unitOfWork, 
+    IProfilesHttpClient profilesHttlClient,
+    ICacheService cacheService)
     : IRequestHandler<ViewAppointmentScheduleQuery, ErrorOr<List<AppointmentsScheduleResponse>>>
 {
     public async Task<ErrorOr<List<AppointmentsScheduleResponse>>> Handle(ViewAppointmentScheduleQuery request, CancellationToken cancellationToken)
     {
-        var appointments = await unitOfWork.AppointmentsRepository.
-            ListAsync(a => a.DoctorId == request.DoctorId && a.Date == request.AppointmentDate.Date);
-        
-        if (appointments == null || !appointments.Any())
+        List<AppointmentsScheduleResponse>? schedule = await cacheService.
+            GetAsync<List<AppointmentsScheduleResponse>>($"schedule {request.AppointmentDate} {request.DoctorId}", cancellationToken);
+
+        if (schedule is not null)
         {
-            return Errors.Appointments.NotFound;
+            return schedule;
         }
 
-        var appointmentResponses = new List<AppointmentsScheduleResponse>();
+        var doctorProfileResponse = await profilesHttlClient.GetDoctorAsync(request.DoctorId);
+
+        if (doctorProfileResponse.IsError)
+        {
+            return doctorProfileResponse.FirstError;
+        }
+
+        var appointments = await unitOfWork.AppointmentsRepository.
+            ListAsync(a => a.DoctorId == request.DoctorId && a.Date.Date == request.AppointmentDate.Date);
+
+        if (appointments is null || !appointments.Any())
+        {
+            return Errors.Appointments.EmptyList;
+        }
+
+        List<AppointmentsScheduleResponse?> appointmentsSchedule = new();
 
         foreach (var appointment in appointments)
         {
-            var patient = await profileService.GetPatientAsync(appointment.PatientId);
-            if (patient == null)
+            var patientProfileResponse = await profilesHttlClient.GetPatientAsync(appointment.PatientId);
+
+            if (patientProfileResponse.IsError)
             {
-                return Error.NotFound();
+                return patientProfileResponse.FirstError;
             }
 
-            var service = await servicesService.GetServiceAsync(appointment.ServiceId);
-            if (service == null)
+            var patientProfile = patientProfileResponse.Value;
+
+            var service = await unitOfWork.ServiceRepository.GetServiceByIdAsync(appointment.ServiceId);
+
+            if (service is null)
             {
-                return Error.NotFound();
+                return Errors.Service.NotFound(appointment.ServiceId);
             }
 
-            appointmentResponses.Add(new AppointmentsScheduleResponse
+            appointmentsSchedule.Add(new AppointmentsScheduleResponse
             {
-                Time = appointment.Date + appointment.Time - appointment.Time.Add(TimeSpan.FromMinutes(10)),
-                PatientFullName = $"{patient.LastName} {patient.FirstName} {patient.MiddleName}",
+                Time = appointment.Time,
+                PatientFullName = $"{patientProfile.LastName} {patientProfile.FirstName} {patientProfile.MiddleName}",
                 PatientProfileLink = $"profileservice.api/patients/{appointment.PatientId}",
                 ServiceName = service.ServiceName,
                 ApprovalStatus = appointment.IsApproved ? "Approved" : "Not approved",
@@ -38,6 +60,15 @@
             });
         }
 
-        return appointmentResponses.OrderBy(a => a.Time).ToList();
+        if (!appointmentsSchedule.Any() || appointmentsSchedule is null)
+        {
+            return Errors.Appointments.EmptySchedule;
+        }
+
+        schedule = appointmentsSchedule.OrderBy(a => a.Time).ToList();
+
+        await cacheService.SetAsync($"schedule {request.AppointmentDate} {request.DoctorId}", schedule, cancellationToken);
+
+        return schedule;
     }
 }

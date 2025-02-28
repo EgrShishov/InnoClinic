@@ -1,6 +1,4 @@
-﻿using Profiles.Application.Commands.Patients.UpdatePatient;
-
-public class UpdatePatientProfileCommandValidator : AbstractValidator<UpdatePatientCommand>
+﻿public class UpdatePatientProfileCommandValidator : AbstractValidator<UpdatePatientCommand>
 {
     public UpdatePatientProfileCommandValidator()
     {

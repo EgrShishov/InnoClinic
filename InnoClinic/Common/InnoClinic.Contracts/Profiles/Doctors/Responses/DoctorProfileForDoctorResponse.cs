@@ -1,5 +1,5 @@
 ﻿public sealed record DoctorProfileForDoctorResponse(
-    byte[] Photo,
+    string PhotoUrl,
     string FirstName,
     string LastName,
     string MiddleName,

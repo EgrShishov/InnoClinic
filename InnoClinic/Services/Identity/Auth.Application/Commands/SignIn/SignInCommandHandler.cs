@@ -1,39 +1,36 @@
 ﻿using Microsoft.AspNetCore.Identity;
 
 public class SignInCommandHandler(
-    IMediator mediator,
-    IAccountRepository _accountRepository,
     UserManager<Account> manager,
-    IEmailSender emailSender,
-    ITokenGenerator tokenService
-    )
-    : IRequestHandler<SignInCommand, ErrorOr<AuthorizationResponse>>
+    ITokenGenerator tokenService) : IRequestHandler<SignInCommand, ErrorOr<AuthorizationResponse>>
 {
     public async Task<ErrorOr<AuthorizationResponse>> Handle(SignInCommand request, CancellationToken cancellationToken)
     {
-        if (!await _accountRepository.EmailExistsAsync(request.Email))
+        var account = await manager.FindByEmailAsync(request.Email);
+        
+        if (account is null)
         {
             return Errors.Authentication.InvalidCredentials;
         }
 
-        var account = await _accountRepository.GetByEmailAsync(request.Email);
-
         var isPasswordValid = await manager.CheckPasswordAsync(account, request.Password);
+        
         if (!isPasswordValid)
         {
             return Errors.Authentication.InvalidCredentials;
         }
 
         var accessToken = tokenService.GenerateAccessToken(account);
-        var refreshToken = tokenService.GenerateRefreshToken(account);
+        var refreshToken = tokenService.GenerateRefreshToken();
 
         account.RefreshToken = refreshToken;
         await manager.UpdateAsync(account);
 
-        var roles = await manager.GetRolesAsync(account);
-        var role = roles.Contains("Doctor") ? "Doctor" :
-                roles.Contains("Receptionist") ? "Receptionist" : "Patient";
-
-        return new AuthorizationResponse(accessToken, refreshToken, role);
+        return new AuthorizationResponse
+        {
+            AccountId = account.Id,
+            AccessToken = accessToken,
+            RefreshToken = refreshToken
+        };
     }
 }

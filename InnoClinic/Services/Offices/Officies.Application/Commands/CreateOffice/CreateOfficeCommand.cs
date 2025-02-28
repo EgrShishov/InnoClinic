@@ -1,10 +1,12 @@
-﻿public sealed record CreateOfficeCommand(
+﻿using Microsoft.AspNetCore.Http;
+
+public sealed record CreateOfficeCommand(
     string City,
     string Street,
     string HouseNumber,
     string OfficeNumber,
-    string PhotoId,
+    IFormFile Photo,
     string RegistryPhoneNumber,
-    bool IsActive) : IRequest<ErrorOr<Office>>
+    bool IsActive) : IRequest<ErrorOr<OfficeResponse>>
 {
 }

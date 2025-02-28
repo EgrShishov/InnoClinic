@@ -1,11 +1,15 @@
-﻿public record UpdateDoctorCommand(
+﻿using Microsoft.AspNetCore.Http;
+
+public record UpdateDoctorCommand(
     int DoctorId,
     string FirstName,
     string LastName,
     string MiddleName,
     DateTime DateOfBirth,
     int SpecializationId,
-    int OfficeId,
+    string OfficeId,
     int CareerStartYear,
-    ProfileStatus Status
+    IFormFile Photo,
+    ProfileStatus Status,
+    int UpdatedBy
 ) : IRequest<ErrorOr<Doctor>>;

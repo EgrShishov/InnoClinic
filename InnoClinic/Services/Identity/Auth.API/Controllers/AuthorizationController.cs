@@ -23,9 +23,9 @@ public class AuthorizationController : ApiController
         return signInResult.Match(
             response => 
             {
-                Response.Cookies.Append("access", response.accessToken);
-                Response.Cookies.Append("refresh", response.refreshToken);
-                return Ok(_mapper.Map<AuthorizationResponse>(response));
+                Response.Cookies.Append("access", response.AccessToken);
+                Response.Cookies.Append("refresh", response.RefreshToken);
+                return Ok(response);
             },
             errors => Problem(errors));
     }
@@ -37,12 +37,47 @@ public class AuthorizationController : ApiController
         var signUpResult = await _mediator.Send(command);
 
         return signUpResult.Match(
-            response => 
+            response =>
             {
-                Response.Cookies.Append("access", response.accessToken);
-                Response.Cookies.Append("refresh", response.refreshToken);
-                return Ok(_mapper.Map<AuthorizationResponse>(response));
+                Response.Cookies.Append("access", response.AccessToken);
+                Response.Cookies.Append("refresh", response.RefreshToken);
+                return Ok(response);
             },
+            errors => Problem(errors));
+    }
+
+    [HttpPost("create")]
+    public async Task<IActionResult> CreateAccount([FromForm] CreateAccountRequest request)
+    {
+        var command = new CreateAccountCommand(
+            request.Email, 
+            request.PhoneNumber, 
+            request.Photo, 
+            request.CreatedBy,
+            request.Role);
+
+        var signUpResult = await _mediator.Send(command);
+
+        return signUpResult.Match(
+            response =>
+            {
+                Response.Cookies.Append("access", response.AccessToken);
+                Response.Cookies.Append("refresh", response.RefreshToken);
+
+                return Ok(response);
+            },
+            errors => Problem(errors));
+    }
+
+    [HttpPut("account/{id}")]
+    public async Task<IActionResult> EditAccount(int AccountId, EditAccountRequest request)
+    {
+        var command = new EditAccountCommand(AccountId, request.UpdatedBy, request.PhoneNumber, request.Photo);
+
+        var editAccountResult = await _mediator.Send(command);
+
+        return editAccountResult.Match(
+            _ => Ok(),
             errors => Problem(errors));
     }
 
@@ -53,53 +88,56 @@ public class AuthorizationController : ApiController
         return NoContent();
     }
 
-    [HttpPost("refresh")]
+    [HttpPost("refresh-token")]
     public async Task<IActionResult> Refresh(RefreshTokenRequest request)
     {
-        int accountId = User.GetUserId();
-        var account = await _userManager.FindByIdAsync(accountId.ToString());
-
-        if(account is null)
-        {
-            return NotFound();
-        }
-
-        var refreshTokenResult = await _mediator.Send(new RefreshTokenCommand(request.accessToken, request.refreshToken));
+        var refreshTokenResult = await _mediator.Send(new RefreshTokenCommand(request.AccessToken, request.RefreshToken));
+        
         if (refreshTokenResult.IsError)
         {
             return BadRequest(refreshTokenResult.FirstError);
         }
 
-        account.RefreshTokens.Add(request.refreshToken);
-        await _userManager.UpdateAsync(account);
-
         return refreshTokenResult.Match(
             response =>
             {
                 Response.Cookies.Delete("access");
-                Response.Cookies.Append("access", response.accessToken);
-                return Ok(_mapper.Map<AuthorizationResponse>(response));
+                Response.Cookies.Append("access", response.AccessToken);
+
+                return Ok(response);
             },
             errors => Problem(errors));
     }
 
-    [HttpGet("verify")]
+    [HttpPost("email-verify")]
     public async Task<IActionResult> VerifyEmail(string link)
     {
-        var verificationResult = await _mediator.Send(new VerifyEmailCommand(link));
+        var id = User.GetUserId();
+
+        var verificationResult = await _mediator.Send(new VerifyEmailCommand(id, link));
 
         return verificationResult.Match(
-            response => Ok(response),
+            response => Ok(),
             errors => Problem(errors));
     }
 
     [HttpGet("account/{id:int}")]
-    public async Task<IActionResult> GetAccountInformation(int id)
+    public async Task<IActionResult> GetAccount(int id)
     {
         var result = await _mediator.Send(new GetAccountByIdQuery(id));
 
         return result.Match(
-            response => Ok(_mapper.Map<AccountResponse>(response)),
+            response => Ok(response),
+            errors => Problem(errors));
+    }
+
+    [HttpDelete("account/{id:int}")]
+    public async Task<IActionResult> DeleteAccount(int id)
+    {
+        var result = await _mediator.Send(new DeleteAccountCommand(id));
+
+        return result.Match(
+            _ => NoContent(),
             errors => Problem(errors));
     }
 }

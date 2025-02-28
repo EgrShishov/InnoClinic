@@ -1,8 +1,19 @@
-﻿public class ViewAppointmentResultsQueryHandler(IUnitOfWork unitOfWork, IProfileService profileService, IServiceService servicesService) 
+﻿public class ViewAppointmentResultsQueryHandler(
+    IUnitOfWork unitOfWork,
+    IProfilesHttpClient profilesHttpClient,
+    ICacheService cacheService)
     : IRequestHandler<ViewAppointmentResultQuery, ErrorOr<ResultResponse>>
 {
     public async Task<ErrorOr<ResultResponse>> Handle(ViewAppointmentResultQuery request, CancellationToken cancellationToken)
     {
+        ResultResponse? result = await cacheService.
+            GetAsync<ResultResponse>($"results {request.ResultsId}", cancellationToken);
+
+        if (result is not null)
+        {
+            return result;
+        }
+
         var results = await unitOfWork.ResultsRepository.GetResultsByIdAsync(request.ResultsId);
 
         if (results is null)
@@ -11,40 +22,56 @@
         }
 
         var appointment = await unitOfWork.AppointmentsRepository.GetAppointmentByIdAsync(results.AppointmentId);
+
         if (appointment is null)
         {
             return Errors.Appointments.NotFound;
         }
 
-        var patientInfo = await profileService.GetPatientAsync(appointment.PatientId);
-        if (patientInfo is null)
-        {
-            return Error.NotFound();
-        }
-        string patientFullName = $"{patientInfo.LastName} {patientInfo.FirstName} {patientInfo.MiddleName}";
-        
-        var doctorInfo = await profileService.GetDoctorAsync(appointment.DoctorId);
-        if (doctorInfo is null)
-        {
-            return Error.NotFound();
-        }
-        string doctorFullName = $"{doctorInfo.LastName} {doctorInfo.FirstName} {doctorInfo.MiddleName}";
+        var patientProfileResponse = await profilesHttpClient.GetPatientAsync(appointment.PatientId);
 
-        var serviceInfo = await servicesService.GetServiceAsync(appointment.ServiceId);
+        if (patientProfileResponse.IsError)
+        {
+            return patientProfileResponse.FirstError;
+        }
+
+        var patientProfile = patientProfileResponse.Value;
+
+        string patientFullName = $"{patientProfile.LastName} {patientProfile.FirstName} {patientProfile.MiddleName}";
+
+        var doctorProfileResponse = await profilesHttpClient.GetDoctorAsync(appointment.DoctorId);
+
+        if (doctorProfileResponse.IsError)
+        {
+            return doctorProfileResponse.FirstError;
+        }
+
+        var doctorProfile = doctorProfileResponse.Value;
+
+        string doctorFullName = $"{doctorProfile.LastName} {doctorProfile.FirstName} {doctorProfile.MiddleName}";
+
+        var serviceInfo = await unitOfWork.ServiceRepository.GetServiceByIdAsync(appointment.ServiceId);
+
         if (serviceInfo is null)
         {
-            return Error.NotFound();
+            return Errors.Service.NotFound(appointment.ServiceId);
         }
 
-        return new ResultResponse(
-            results.Date,
-            patientFullName,
-            patientInfo.DateOfBirth,
-            doctorFullName,
-            doctorInfo.Specialization,
-            serviceInfo.ServiceName,
-            results.Complaints,
-            results.Conclusion,
-            results.Recommendations);
+        var resultResponse = new ResultResponse
+        {
+            AppointmentDate = results.Date,
+            PatientsFullName = patientFullName,
+            PatientDateOfBirth = patientProfile.DateOfBirth,
+            DoctorsFullName = doctorFullName,
+            DoctorsSpecialization = doctorProfile.SpecializationName,
+            ServiceName = serviceInfo.ServiceName,
+            Complaints = results.Complaints,
+            Conclusion = results.Conclusion,
+            Reccomendations = results.Recommendations
+        };
+
+        await cacheService.SetAsync($"results {request.ResultsId}", resultResponse, cancellationToken);
+
+        return resultResponse;
     }
 }

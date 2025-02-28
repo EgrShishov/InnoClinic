@@ -2,7 +2,7 @@
 
 public interface ITokenGenerator
 {
-    string GenerateAccessToken(Account account);
-    string GenerateRefreshToken(Account account);
-    ClaimsPrincipal GetPrincipalFromExpiredToken(string token);
+    public string GenerateAccessToken(Account account);
+    public string GenerateRefreshToken();
+    public ClaimsPrincipal GetPrincipalFromToken(string token);
 }

@@ -15,14 +15,15 @@ public class PhotoRepository : IPhotoRepository
         await _context.SaveChangesAsync();
     }
 
-    public async Task<Photo> GetPhotoByUrlAsync(string url)
+    public async Task<Photo> GetPhotoAsync(string url)
     {
         return await _context.Photos.FirstOrDefaultAsync(p => p.Url == url);
     }
 
-    public async Task DeletePhotoByUrlAsync(string url)
+    public async Task DeletePhotoAsync(string url)
     {
         var photo = await _context.Photos.FirstOrDefaultAsync(p => p.Url == url);
+
         if (photo != null)
         {
             _context.Entry(photo).State = EntityState.Deleted;

@@ -1,6 +1,8 @@
-﻿public record PatientListResponse(
-    int Id,
-    string LastName,
-    string FirstName,
-    string MiddleName,
-    string PhoneNumber);
+﻿public class PatientListResponse
+{
+    public int Id { get; init; }
+    public string LastName { get; init; }
+    public string FirstName { get; init; }
+    public string MiddleName { get; init; }
+    public string PhoneNumber { get; init; }
+}

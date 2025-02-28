@@ -2,8 +2,15 @@
 {
     public async Task<ErrorOr<List<Doctor>>> Handle(FilterBySpecializationQuery request, CancellationToken cancellationToken)
     {
-        var doctors = await unitOfWork.DoctorsRepository.FilterBySpecializationAsync(request.SpecializationId, request.PageNumber, request.PageSize);
-        // checking specializationId
+        var doctors = await unitOfWork
+            .DoctorsRepository
+            .ListDoctorsAsync(d => d.SpecializationId == request.SpecializationId, request.PageNumber, request.PageSize);
+
+        if (doctors is null || !doctors.Any())
+        {
+            return Errors.Doctors.EmptyList;
+        }
+
         return doctors;
     }
 }

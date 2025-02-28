@@ -1,3 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 
-public record UploadPhotoRequest(IFormFile file);
+public class UploadPhotoRequest
+{
+    public IFormFile File { get; init; }
+}

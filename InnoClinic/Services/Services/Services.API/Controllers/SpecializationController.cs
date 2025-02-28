@@ -2,23 +2,22 @@
 public class SpecializationController : ApiController
 {
     private readonly IMediator _mediator;
-    private readonly ILogger _logger;
     private readonly IMapper _mapper;
 
-    public SpecializationController(IMediator mediator, ILogger logger, IMapper mapper)
+    public SpecializationController(IMediator mediator, IMapper mapper)
     {
         _mediator = mediator;
-        _logger = logger;
         _mapper = mapper;
     }
 
-    [HttpGet("all-specializations")]
+    [HttpGet("all")]
     [Authorize(Roles = "Patient")]
     public async Task<IActionResult> GetAllSpecializations()
     {
         var result = await _mediator.Send(new ViewSpecializationsListQuery());
+
         return result.Match(
-            services => Ok(_mapper.Map<List<SpecializationInfoResponse>>(services)),
+            specializations => Ok(specializations),
             errors => Problem(errors));
     }
 
@@ -26,32 +25,36 @@ public class SpecializationController : ApiController
     [Authorize(Roles = "Receptionist")]
     public async Task<IActionResult> GetSpecializationInfo(int id)
     {
-        var result = await _mediator.Send(new ViewServicesInfoQuery(id));
+        var result = await _mediator.Send(new ViewSpecializationsInfoQuery(id));
+
         return result.Match(
-            services => Ok(_mapper.Map<SpecializationInfoResponse>(services)),
+            specialization => Ok(specialization),
             errors => Problem(errors));
     }
 
-    [HttpPost("create-specialization")]
+    [HttpPost("create")]
     [Authorize(Roles = "Receptionist")]
     public async Task<IActionResult> CreateSpecialization(CreateSpecializationRequest request)
     {
         var command = _mapper.Map<CreateSpecializationCommand>(request);
+
         var result = await _mediator.Send(command);
+
         return result.Match(
-            services => Ok(_mapper.Map<SpecializationInfoResponse>(services)),
+            specialization => Ok(specialization),
             errors => Problem(errors));
     }
 
-    [HttpPut("update-specialization")]
+    [HttpPut("{id}")]
     [Authorize(Roles = "Receptionist")]
     public async Task<IActionResult> UpdateSpecializationInfo(int id, UpdateSpecializationRequest request)
     {
         var command = _mapper.Map<UpdateSpecializationCommand>((id, request));
-        var result = await _mediator.Send(command);
+
+        var result = await _mediator.Send(new UpdateSpecializationCommand(id, request.SpecializationName, request.IsActive));
 
         return result.Match(
-            service => Ok(_mapper.Map<SpecializationInfoResponse>(service)),
+            specialization => Ok(specialization),
             errors => Problem(errors));
     }
 
@@ -62,7 +65,18 @@ public class SpecializationController : ApiController
         var result = await _mediator.Send(new ChangeSpecializationStatusCommand(id, status));
 
         return result.Match(
-            service => Ok(_mapper.Map<ServiceInfoResponse>(service)),
+            specialization => Ok(specialization),
+            errors => Problem(errors));
+    }
+
+    [HttpDelete("{id}")]
+    [Authorize(Roles = "Receptionsit")]
+    public async Task<IActionResult> DeleteSpecialization(int id)
+    {
+        var result = await _mediator.Send(new DeleteSpecializationCommand(id));
+
+        return result.Match(
+            _ => Ok(),
             errors => Problem(errors));
     }
 }

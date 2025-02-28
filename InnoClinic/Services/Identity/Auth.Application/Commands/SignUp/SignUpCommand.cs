@@ -1,5 +1,3 @@
-﻿
-public sealed record SignUpCommand(string Email, string Password, string ReenteredPassword, string Role)
-    : IRequest<ErrorOr<AuthorizationResponse>>
+﻿public sealed record SignUpCommand(string Email, string Password, string PhoneNumber) : IRequest<ErrorOr<AuthorizationResponse>>
 {
 }

@@ -1,4 +1,8 @@
 ﻿public interface ITimeSlotsGenerator
 {
-    public List<TimeSpan> GenerateSlots(DateTime appointmentDate, TimeSpan startWorkingHours, TimeSpan endWorkingHours, string serviceCategoryId);
+    public Task<List<TimeSlotResponse>> GenerateSlots(
+        DateTime appointmentDate, 
+        TimeSpan startWorkingHours, 
+        TimeSpan endWorkingHours, 
+        ServiceCategory serviceCategory);
 }

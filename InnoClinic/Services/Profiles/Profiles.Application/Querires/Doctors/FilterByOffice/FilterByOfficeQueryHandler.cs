@@ -2,10 +2,20 @@
 {
     public async Task<ErrorOr<List<Doctor>>> Handle(FilterByOfficeQuery request, CancellationToken cancellationToken)
     {
-        var doctors = await unitOfWork.DoctorsRepository.FilterByOfficeAsync(request.OfficeId, request.PageNumber, request.PageSize);
-        if (doctors is null)
+        var office = await unitOfWork.OfficeRepository.GetOfficeByIdAsync(request.OfficeId);
+
+        if (office is null)
         {
-            return Errors.Doctors.NotFound;
+            return Errors.Office.NotFound;
+        }
+
+        var doctors = await unitOfWork
+            .DoctorsRepository
+            .ListDoctorsAsync(d => d.OfficeId == request.OfficeId, request.PageNumber, request.PageSize, cancellationToken);
+        
+        if (doctors is null || !doctors.Any())
+        {
+            return Errors.Doctors.EmptyList;
         }
 
         return doctors;

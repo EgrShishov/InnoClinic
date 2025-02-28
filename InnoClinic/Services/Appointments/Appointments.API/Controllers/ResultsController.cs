@@ -14,8 +14,9 @@
     public async Task<IActionResult> GetAppointmentResult(int id)
     {
         var result = await _mediator.Send(new ViewAppointmentResultQuery(id));
+
         return result.Match(
-            appointmentResult => Ok(_mapper.Map<ResultResponse>(appointmentResult)),
+            appointmentResult => Ok(appointmentResult),
             errors => Problem(errors));
     }
 
@@ -24,38 +25,52 @@
     public async Task<IActionResult> DownloadAppointmentsResults(int id)
     {
         var result = await _mediator.Send(new DownloadAppointmentResultsQuery(id));
-        var filename = $"appointments-{id}";
-        var mimeType = "application/octet-stream";
 
         return result.Match(
-            fileBytes => Ok(new FileContentResult(fileBytes, mimeType)
-            {
-                FileDownloadName = filename
-            }),
+             formFile =>
+             {
+                 using var memoryStream = new MemoryStream();
+                 using var inputStream = formFile.OpenReadStream();
+
+                 inputStream.CopyTo(memoryStream);
+                 memoryStream.Position = 0;
+
+                 return File(memoryStream, formFile.ContentType, formFile.FileName);
+             },
             errors => Problem(errors));
     }
 
-    [HttpPost("create-result")]
+    [HttpPost("create")]
     [Authorize(Roles = "Doctor")]
-    public async Task<IActionResult> CreateAppointmentResult(int doctorId, CreateAppointmentResultRequest request)
+    public async Task<IActionResult> CreateAppointmentResult(CreateAppointmentResultRequest request)
     {
-        var command = _mapper.Map<CreateAppointmentsResultCommand>((doctorId, request));
+        //var command = _mapper.Map<CreateAppointmentsResultCommand>(request);
+        var command = new CreateAppointmentsResultCommand(
+            request.AppointmentId, 
+            request.PatientId, 
+            request.DoctorId, 
+            request.ServiceId, 
+            request.Complaints, 
+            request.Conclusion, 
+            request.Recommendations);
+
         var result = await _mediator.Send(command);
 
         return result.Match(
-            result => Ok(_mapper.Map<ResultResponse>(result)),
+            result => Ok(result),
             errors => Problem(errors));
     }
 
-    [HttpPut("{id:int}")]
+    [HttpPut("edit/{id:int}")]
     [Authorize(Roles = "Doctor")]
     public async Task<IActionResult> UpdateAppointmentResultInfo(int id, UpdateAppointmentResultRequest request)
     {
-        var command = _mapper.Map<EditAppointmentsResultCommand>((id, request));
+        var command = new EditAppointmentsResultCommand(id, request.Complaints, request.Conclusion, request.Recommendations);
+
         var result = await _mediator.Send(command);
 
         return result.Match(
-            appointmentResult => Ok(_mapper.Map<ResultResponse>(appointmentResult)),
+            appointmentResult => Ok(appointmentResult),
             errors => Problem(errors));
     }
 }

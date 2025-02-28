@@ -1,6 +1,6 @@
 ﻿public record DoctorsListForAdminResponse(
     int Id,
-    byte[] Photo,
+    string PhotoUrl,
     string LastName,
     string FirstName,
     string MiddleName,

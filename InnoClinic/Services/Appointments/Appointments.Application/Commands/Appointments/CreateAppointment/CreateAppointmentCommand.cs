@@ -3,7 +3,7 @@
     int SpecializationId,
     int DoctorId,
     int ServiceId,
-    int OfficeId,
+    string OfficeId,
     DateTime Date,
     TimeSpan Time
     ) : IRequest<ErrorOr<Appointment>>

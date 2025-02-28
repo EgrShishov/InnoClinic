@@ -1,11 +1,13 @@
-﻿public record ReceptionistProfileInfoResponse(
-        int id,
-        byte[] Photo,
-        string FirstName,
-        string LastName,
-        string MiddleName,
-        string Email,
-        string City,
-        string Street,
-        string HouseNumber,
-        string OfficeNumber);
+﻿public class ReceptionistProfileInfoResponse
+{
+    public int Id { get; init; }
+    public string PhotoUrl {  get; init; }
+    public string FirstName {  get; init; }
+    public string LastName { get; init; }
+    public string MiddleName { get; init; }
+    public string Email { get; init; }
+    public string City { get; init; }
+    public string Street { get; init; }
+    public string HouseNumber { get; init; }
+    public string OfficeNumber { get; init; }
+}

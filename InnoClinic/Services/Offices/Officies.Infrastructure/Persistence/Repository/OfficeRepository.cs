@@ -1,50 +1,73 @@
-﻿using MongoDB.Driver;
+﻿using Microsoft.EntityFrameworkCore;
+using MongoDB.Bson;
 using MongoDB.Driver.Linq;
 using System.Linq.Expressions;
 public class OfficeRepository : IOfficeRepository
 {
-    private readonly IMongoCollection<Office> _offices;
+    private readonly OfficesDbContext _dbContext;
 
-    public OfficeRepository(IMongoClient mongoClient)
+    public OfficeRepository(OfficesDbContext dbContext)
     {
-        var database = mongoClient.GetDatabase("OfficesDb");
-        _offices = database.GetCollection<Office>("Offices");
+        _dbContext = dbContext;
     }
 
-    public async Task<List<Office>> GetOfficesAsync()
+    public async Task<List<Office>> GetOfficesAsync(CancellationToken cancellationToken = default)
     {
-        return await _offices.Find(office => true).ToListAsync();
+        return await _dbContext.Offices.ToListAsync(cancellationToken);
     }
 
-    public async Task<Office> GetOfficeByIdAsync(string id, IClientSessionHandle session)
+    public async Task<Office> GetOfficeByIdAsync(string id, CancellationToken cancellationToken = default)
     {
-        return await _offices.Find(session, office => office.Id == id).FirstOrDefaultAsync();
+        if (!ObjectId.TryParse(id, out ObjectId Id)) 
+        {
+            return null;
+        }
+
+        return await _dbContext.Offices.FirstOrDefaultAsync(o => o.Id == Id, cancellationToken);
     }
 
-    public async Task AddOfficeAsync(Office office, IClientSessionHandle session)
+    public async Task<string> AddOfficeAsync(Office office, CancellationToken cancellationToken = default)
     {
-        await _offices.InsertOneAsync(session, office);
+        office.Id = ObjectId.GenerateNewId();
+
+        var addedOffice = await _dbContext.Offices.AddAsync(office, cancellationToken);
+
+        return addedOffice.Entity.Id.ToString();
     }
 
-    public async Task UpdateOfficeAsync(Office office, IClientSessionHandle session)
+    public Task UpdateOfficeAsync(Office office, CancellationToken cancellationToken = default)
     {
-        await _offices.ReplaceOneAsync(session, o => o.Id == office.Id, office);
+        _dbContext.Entry(office).State = EntityState.Modified;
+        
+        return Task.FromResult(office);
     }
 
-    public async Task DeleteOfficeAsync(string id, IClientSessionHandle session)
+    public async Task DeleteOfficeAsync(string id, CancellationToken cancellationToken = default)
     {
-        await _offices.DeleteOneAsync(session, office => office.Id == id);
+        if (!ObjectId.TryParse(id, out ObjectId Id))
+        {
+            return;
+        }
+
+        var office = await _dbContext.Offices.FirstOrDefaultAsync(o => o.Id == Id, cancellationToken);
+
+        if (office is null)
+        {
+            return;
+        }
+
+        _dbContext.Offices.Remove(office);
     }
 
-    public Task<List<Office>> ListOfficesAsync(Expression<Func<Office, bool>> filter)
+    public Task<List<Office>> ListOfficesAsync(Expression<Func<Office, bool>> filter, CancellationToken cancellationToken = default)
     {
-        var query = _offices.AsQueryable();
+        var query = _dbContext.Offices.AsQueryable();
 
         if (filter != null)
         {
             query = query.Where(filter);
         }
 
-        return query.ToListAsync();
+        return query.ToListAsync(cancellationToken);
     }
 }   

@@ -1,1 +1,1 @@
-﻿public record ViewByIdQuery(int DoctorId) : IRequest<ErrorOr<Doctor>>;
+﻿public record ViewByIdQuery(int DoctorId) : IRequest<ErrorOr<DoctorProfileResponse>>;

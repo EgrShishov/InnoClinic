@@ -5,15 +5,12 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddApplication(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddMediatR(conf => conf.RegisterServicesFromAssembly(typeof(DependencyInjection).Assembly));
-        services.AddValidation();
-
-        return services;
-    }
-
-    public static IServiceCollection AddValidation(this IServiceCollection services)
-    {
-        services.AddValidatorsFromAssembly(typeof(DependencyInjection).Assembly);
+        services.AddValidatorsFromAssembly(typeof(DependencyInjection).Assembly)
+            .AddMediatR(conf =>
+        {
+            conf.RegisterServicesFromAssembly(typeof(DependencyInjection).Assembly);
+            conf.AddOpenBehavior(typeof(ValidationBehaviour<,>));
+        });
 
         return services;
     }

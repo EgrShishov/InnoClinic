@@ -1,106 +1,108 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-[Route("api/[controller]")]
 public class PatientsController : ApiController
 {
     private readonly IMediator _mediator;
-    private readonly ILogger _logger;
     private readonly IMapper _mapper;
 
-    public PatientsController(IMediator mediator, ILogger logger, IMapper mapper)
+    public PatientsController(IMediator mediator, IMapper mapper)
     {
         _mediator = mediator;
-        _logger = logger;
         _mapper = mapper;
     }
 
-    [Authorize(Roles = "Patient, Receptionist")]
-    [HttpPost("create-profile")]
+    [HttpPost("profile/link")]
+    //[Authorize(Roles = "Patient")]
+    public async Task<IActionResult> LinkProfile(int accountId, int profileId)
+    {
+        var result = await _mediator.Send(new LinkPatientToExistingAccountCommand(accountId, profileId));
+
+        return result.Match(
+            _ => Ok("Profile linked successfully"),
+            errors => Problem(errors));
+    }
+
+    [HttpPost("create")]
+    //[Authorize(Roles = "Patient, Receptionist")]
     public async Task<IActionResult> CreatePatientProfile(CreatePatientRequest request)
     {
-        var command = _mapper.Map<CreatePatientCommand>(request);
-        var result = await _mediator.Send(command);
-        if (result.IsError)
-        {
-            return BadRequest(result.FirstError.Description);
-        }
+        var command = new CreatePatientCommand(
+            request.FirstName,
+            request.LastName,
+            request.MiddleName,
+            request.PhoneNumber,
+            request.Email,
+            request.DateOfBirth,
+            request.Photo);
 
-        var response = result.Value.Adapt<PatientProfileResponse>();
-        return Ok(response);
+        var result = await _mediator.Send(command);
+
+        return result.Match(
+            patient => Ok(patient),
+            errors => Problem(errors));
     }
 
-    [Authorize(Roles = "Patient, Receptionist")]
-    [HttpPut("edit-profile/{id:int}")]
+    [HttpPut("profile/edit/{id:int}")]
+    //[Authorize(Roles = "Patient, Receptionist")]
     public async Task<IActionResult> EditProfile(int id, UpdatePatientRequest request)
     {
-        var command = _mapper.Map<UpdatePatientCommand>((id, request));
+        var command = new UpdatePatientCommand(
+            id, 
+            request.FirstName,
+            request.LastName, 
+            request.MiddleName, 
+            request.PhoneNumber, 
+            request.DateOfBirth);
+
         var result = await _mediator.Send(command);
 
-        if (result.IsError)
-        {
-            return BadRequest(result.FirstError.Description);
-        }
-
-        var response = result.Value.Adapt<PatientProfileResponse>();
-        return Ok(response);
+        return result.Match(
+            patient => Ok(patient),
+            errors => Problem(errors));
     }
 
-    [Authorize(Roles = "Receptionist")]
-    [HttpDelete]
+    [HttpDelete("{id}")]
+    //[Authorize(Roles = "Receptionist")]
     public async Task<IActionResult> DeletePatientProfile(int id)
     {
         var result = await _mediator.Send(new DeletePatientCommand(id));
 
-        if (result.IsError)
-        {
-            return BadRequest(result.FirstError.Description);
-        }
-
-        return Ok(result.Value);
+        return result.Match(
+            _ => NoContent(),
+            errors => Problem(errors));
     }
 
-    [Authorize(Roles = "Doctor, Receptionist, Patient")] //difference between roles -> receptionist doesnt see appoitments
-    [HttpGet("{id:int}")]
+    [HttpGet("profile/{id:int}")]
+    //[Authorize(Roles = "Doctor, Receptionist, Patient")] //difference between roles -> receptionist doesnt see appoitments
     public async Task<IActionResult> GetPatientProfile(int id)
     {
         var result = await _mediator.Send(new ViewPatientProfileQuery(id));
 
-        if (result.IsError)
-        {
-            return BadRequest(result.FirstError.Description);
-        }
-
-        return Ok(_mapper.Map<PatientProfileResponse>(result.Value));
+        return result.Match(
+            patient => Ok(patient),
+            errors => Problem(errors));
     }
 
-    [Authorize(Roles = "Receptionist")]
-    [HttpGet("search-by-name")]
+    [HttpGet("search/by-name")]
+    //[Authorize(Roles = "Receptionist")]
     public async Task<IActionResult> GetPatientByName(string FirstName, string LastName, string MiddleName)
     {
         var result = await _mediator.Send(new SearchPatientByNameQuery(FirstName, LastName, MiddleName));
 
-        if (result.IsError)
-        {
-            return BadRequest(result.FirstError.Description);
-        }
-
-        return Ok(_mapper.Map<PatientProfileResponse>(result.Value));
+        return result.Match(
+            patient => Ok(patient),
+            errors => Problem(errors));
     }
 
-    [Authorize(Roles = "Receptionist")]
-    [HttpGet("all-patients")]
+    [HttpGet("all")]
+    //[Authorize(Roles = "Receptionist")]
     public async Task<IActionResult> GetAllPatients(int pageNumber, int pageSize)
     {
         var result = await _mediator.Send(new ViewAllPatientsQuery(pageNumber, pageSize));
 
-        if (result.IsError)
-        {
-            return BadRequest(result.FirstError.Description);
-        }
-
-        return Ok(_mapper.Map<List<PatientProfileResponse>>(result.Value));
+        return result.Match(
+            patients => Ok(patients),
+            errors => Problem(errors));
     }
-
-
 }

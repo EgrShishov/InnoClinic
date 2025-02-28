@@ -1,4 +1,6 @@
-﻿public class RescheduleAppointmentCommandHandler(IUnitOfWork unitOfWork) : IRequestHandler<RescheduleAppointmentCommand, ErrorOr<Appointment>>
+﻿public class RescheduleAppointmentCommandHandler(
+    IUnitOfWork unitOfWork,
+    ICacheService cacheService) : IRequestHandler<RescheduleAppointmentCommand, ErrorOr<Appointment>>
 {
     public async Task<ErrorOr<Appointment>> Handle(RescheduleAppointmentCommand request, CancellationToken cancellationToken)
     {
@@ -7,6 +9,7 @@
         try
         {
             var appointment = await unitOfWork.AppointmentsRepository.GetAppointmentByIdAsync(request.AppointmentId);
+            
             if (appointment is null)
             {
                 return Errors.Appointments.NotFound;
@@ -24,6 +27,14 @@
             await unitOfWork.AppointmentsRepository.UpdateAppointmentAsync(appointment, cancellationToken);
             await unitOfWork.CommitTransactionAsync(cancellationToken);
             await unitOfWork.SaveChangesAsync(cancellationToken);
+
+            List<AppointmentListResponse>? appointmentsList = await cacheService
+                .GetAsync<List<AppointmentListResponse>>("appointments", cancellationToken);
+
+            if (appointmentsList is not null)
+            {
+                await cacheService.RemoveAsync("appointments", cancellationToken);
+            }
 
             return appointment;
         }

@@ -4,9 +4,13 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {
-        services.AddMediatR(conf => conf.RegisterServicesFromAssembly(typeof(DependencyInjection).Assembly))
-                .AddValidatorsFromAssembly(typeof(DependencyInjection).Assembly);
-        services.AddTransient<ITimeSlotsGenerator, TimeSlotsGenerator>();
+        services.AddMediatR(conf => 
+            {
+                conf.RegisterServicesFromAssembly(typeof(DependencyInjection).Assembly);
+                conf.AddOpenBehavior(typeof(ValidationBehaviour<,>));
+            })
+            .AddValidatorsFromAssembly(typeof(DependencyInjection).Assembly);
+        services.AddScoped<ITimeSlotsGenerator, TimeSlotsGenerator>();
         return services;
     }
 }

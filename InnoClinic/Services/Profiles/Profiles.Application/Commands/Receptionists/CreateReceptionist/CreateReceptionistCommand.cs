@@ -1,9 +1,13 @@
-﻿public sealed record CreateReceptionistCommand(
+﻿using Microsoft.AspNetCore.Http;
+
+public sealed record CreateReceptionistCommand(
     string FirstName,
     string LastName,
     string MiddleName,
     string Email,
+    string PhoneNumber,
+    int CreatedBy,
     string OfficeId,
-    string PhotoUrl) : IRequest<ErrorOr<CreateReceptionistProfileResponse>>
+    IFormFile Photo) : IRequest<ErrorOr<CreateReceptionistProfileResponse>>
 {
 }

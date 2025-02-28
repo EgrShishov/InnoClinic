@@ -1,4 +1,6 @@
-﻿public interface IPDFDocumentGenerator
+﻿using Microsoft.AspNetCore.Http;
+
+public interface IPDFDocumentGenerator
 {
-    public byte[] GenerateAppointmentResults(GeneratePDFResultsRequest results);
+    public IFormFile GenerateAppointmentResults(GeneratePDFResultsRequest results);
 }

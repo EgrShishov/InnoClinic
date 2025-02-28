@@ -1,19 +1,35 @@
-﻿public class DeleteOfficeCommandHandler(IUnitOfWork unitOfWork) : IRequestHandler<DeleteOfficeCommand, ErrorOr<Unit>>
+﻿using InnoClinic.Contracts.OfficeDeletedEvent;
+
+public class DeleteOfficeCommandHandler(IUnitOfWork unitOfWork, IFilesHttpClient filesHttpClient, IEventBus eventBus) 
+    : IRequestHandler<DeleteOfficeCommand, ErrorOr<Unit>>
 {
     public async Task<ErrorOr<Unit>> Handle(DeleteOfficeCommand request, CancellationToken cancellationToken)
     {
-        await unitOfWork.BeginTransactionAsync();
+        var office = await unitOfWork.OfficeRepository.GetOfficeByIdAsync(request.Id, cancellationToken);
+        
+        if (office is null)
+        {
+            return Errors.Offices.NotFound;
+        }
 
-        try
+/*        var photoDeletionResult = await filesHttpClient.DeletedPhoto($"{office.City}-{office.OfficeNumber}");
+        
+        if (photoDeletionResult.IsError)
         {
-            await unitOfWork.OfficeRepository.DeleteOfficeAsync(request.Id, unitOfWork.Session);
-            await unitOfWork.CommitTransactionAsync(cancellationToken);
-        }
-        catch (Exception)
+            return Errors.FilesApi.DeletingError;
+        }*/
+
+        await unitOfWork.OfficeRepository.DeleteOfficeAsync(request.Id, cancellationToken);
+        
+        await unitOfWork.CommitTransactionAsync(cancellationToken);
+        
+        await unitOfWork.SaveChangesAsync(cancellationToken);
+
+        await eventBus.PublishAsync(new OfficeDeletedEvent
         {
-            await unitOfWork.RollbackTransactionAsync();
-            throw;
-        }
+            Id = request.Id.ToString()
+        });
+
         return Unit.Value;
     }
 }

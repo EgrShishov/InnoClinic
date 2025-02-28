@@ -1,39 +1,83 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using System.Data;
 
 public class UnitOfWork : IUnitOfWork
 {
-    private readonly IServiceProvider _serviceProvider;
-    public UnitOfWork(IServiceProvider serviceProvider, IConfiguration configuration)
+    private readonly ISqlConnectionFactory _factory;
+    private IDbConnection _dbConnection;
+    private IDbTransaction _dbTransaction;
+    public UnitOfWork(ISqlConnectionFactory factory)
     {
-        _serviceProvider = serviceProvider;
+        _factory = factory;
+
+        _dbConnection = factory.CreateConnection();
+        _dbConnection.Open();
+
+        _dbTransaction = _dbConnection.BeginTransaction();
+
+        Services = new ServicesRepository(_factory);
+        Specializations = new SpecializationsRepository(_factory);
     }
 
-    public ISpecializationsRepository Specializations => _serviceProvider.GetService<ISpecializationsRepository>();
-    public IServicesRepository Services => _serviceProvider.GetService<IServiceProvider>();
-    public IServiceCategoryRepository Categories => _serviceProvider.GetService<IServiceCategoryRepository>();
+    public ISpecializationsRepository Specializations { get; }
+    public IServicesRepository Services { get; }
 
-    public Task BeginTransactionAsync()
+    public Task BeginTransactionAsync(CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        if (_dbTransaction is null)
+        {
+            _dbTransaction = _dbConnection.BeginTransaction(); 
+        }
+
+        return Task.CompletedTask;
     }
 
-    public Task CommitTransactionAsync()
+    public Task CommitTransactionAsync(CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        if (_dbTransaction is null)
+        {
+            return Task.CompletedTask;
+        }
+
+        _dbTransaction.Commit();
+
+        return Task.CompletedTask;
     }
 
     public void Dispose()
     {
-        throw new NotImplementedException();
+        _dbTransaction.Dispose();
+        _dbConnection.Dispose();
+        GC.SuppressFinalize(this);
     }
 
-    public Task RollbackTransactionAsync()
+    public Task RollbackTransactionAsync(CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        if (_dbTransaction is null)
+        {
+            return Task.CompletedTask;
+        }
+
+        _dbTransaction.Rollback();
+
+        return Task.CompletedTask;
     }
 
-    public Task<int> SaveChangesAsync()
+    public Task SaveChangesAsync(CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        try
+        {
+            _dbTransaction.Commit();
+        }
+        catch
+        {
+            _dbTransaction.Rollback();
+            throw;
+        }
+        finally
+        {
+            _dbConnection.Close();
+        }
+
+        return Task.CompletedTask;
     }
 }

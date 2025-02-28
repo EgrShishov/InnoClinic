@@ -1,4 +1,4 @@
-﻿public sealed record ViewServicesQuery(int ServiceCategoryId) : IRequest<ErrorOr<List<ServiceResponse>>>
+﻿public sealed record ViewServicesQuery() : IRequest<ErrorOr<List<ServiceResponse>>>
 {
 }
 

@@ -2,9 +2,13 @@
 {
     public static class Receptionists
     {
-        public static Error NotFound => Error.NotFound(
-            code: "Receptionist.NotFound",
-            description: "Receptionist not found.");
+        public static Error NotFound(int id) => Error.NotFound(
+            code: "Receptionist.DoesNotExist",
+            description: $"Receptionist with id: {id} not found.");    
+
+        public static Error EmptyList => Error.NotFound(
+            code: "Receptionist.EmptyList",
+            description: $"There are no receptionists profiles.");
 
         public static Error EmailAlreadyExists => Error.Conflict(
             code: "Receptionist.EmailAlreadyExists",

@@ -1,6 +1,7 @@
-﻿public record ServiceResponse(
-    int ServiceCategoryId,
-    string ServiceCategoryName,
-    List<AppointmentInfoResponse> appointments
-    //List<Analyzez> //wtf should i do here?
-    );
+﻿public class ServiceResponse
+{
+    public string ServiceCategoryName {  get; init; }
+    public decimal? ServicePrice { get; init; }
+    public string ServiceName { get; init; }
+    public string Specialization { get; init; }
+}

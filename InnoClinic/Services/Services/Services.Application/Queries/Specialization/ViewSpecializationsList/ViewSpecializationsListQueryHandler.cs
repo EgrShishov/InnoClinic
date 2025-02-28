@@ -4,12 +4,14 @@
     public async Task<ErrorOr<List<SpecializationResponse>>> Handle(ViewSpecializationsListQuery request, CancellationToken cancellationToken)
     {
         var specializations = await unitOfWork.Specializations.GetAllAsync(cancellationToken);
+        
         if (specializations is null)
         {
-            return Error.NotFound();
+            return Errors.Specialization.EmptySpecializationsList;
         }
 
-        var specializationsList = new List<SpecializationInfoResponse>();
+        var specializationsList = new List<SpecializationResponse>();
+
         foreach (var specialization in specializations)
         {
             specializationsList.Add(new SpecializationResponse

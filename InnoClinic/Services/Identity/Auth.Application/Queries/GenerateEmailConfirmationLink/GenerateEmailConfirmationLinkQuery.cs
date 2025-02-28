@@ -1,3 +1,3 @@
-﻿public sealed record GenerateEmailConfirmationLinkQuery(Account Account) : IRequest<ErrorOr<string>>
+﻿public sealed record GenerateEmailConfirmationLinkQuery(int AccountId) : IRequest<ErrorOr<string>>
 {
 }

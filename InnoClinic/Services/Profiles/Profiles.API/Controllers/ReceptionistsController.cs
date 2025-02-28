@@ -5,68 +5,82 @@ using Microsoft.AspNetCore.Mvc;
 public class ReceptionistsController : ApiController
 {
     private readonly IMediator _mediator;
-    private readonly ILogger _logger;
     private readonly IMapper _mapper;
 
-    public ReceptionistsController(IMediator mediator, ILogger logger, IMapper mapper)
+    public ReceptionistsController(IMediator mediator, IMapper mapper)
     {
         _mediator = mediator;
-        _logger = logger;
         _mapper = mapper;
     }
 
-    [HttpPost("create-profile")]
+    [HttpPost("create")]
     public async Task<IActionResult> CreateReceptionsitProfile(CreateReceptionistRequest request)
     {
-        var command = _mapper.Map<CreateReceptionistCommand>(request);
+        int CreatedBy = 0;
+
+        var command = new CreateReceptionistCommand(
+            request.FirstName, 
+            request.LastName, 
+            request.MiddleName, 
+            request.Email,
+            request.PhoneNumber,
+            CreatedBy,
+            request.OfficeId, 
+            request.Photo);
+
         var result = await _mediator.Send(command);
 
         return result.Match(
-            value => Ok(_mapper.Map<ReceptionistProfileInfoResponse>(value)),
+            value => Ok(value),
             errors => Problem(errors));
     }
 
-    [HttpPut("edit-profile/{id:int}")]
+    [HttpPut("profile/edit/{id:int}")]
     public async Task<IActionResult> UpdateReceptionsitProfile(int id, UpdateReceptionistRequest request)
     {
-        var command = _mapper.Map<UpdateReceptionistCommand>((id, request));
+        var command = new UpdateReceptionistCommand(
+            id,
+            request.FirstName,
+            request.LastName,
+            request.MiddleName,
+            request.Email,
+            request.Photo,
+            request.OfficeId);
+
         var result = await _mediator.Send(command);
 
         return result.Match(
-            value => Ok(_mapper.Map<ReceptionistProfileInfoResponse>(value)),
+            value => Ok(value),
             errors => Problem(errors));
     }
 
-    [HttpDelete]
+    [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteReceptionsitProfile(int id)
     {
         var result = await _mediator.Send(new DeleteReceptionistCommand(id));
-            
-        if (result.IsError)
-        {
-            return BadRequest(result.FirstError.Description);
-        }
 
-        return Ok(result.Value);
+        return result.Match(
+            response => Ok(response),
+            errors => Problem(errors));
     }
 
-    [HttpGet("{id:int}")]
+    [HttpGet("profile/{id:int}")]
     public async Task<IActionResult> GetReceptionist(int id)
     {
         var result = await _mediator.Send(new ViewReceptionistProfileQuery(id));
 
         return result.Match(
-            value => Ok(_mapper.Map<ReceptionistProfileInfoResponse>(value)),
+            value => Ok(value),
             errors => Problem(errors));
     }
 
-    [HttpGet("all-receptionists")]
+    [HttpGet("all")]
     public async Task<IActionResult> GetAllReceptionist(int pageNumber, int pageSize)
     {
         var result = await _mediator.Send(new ViewAllReceptionistsQuery(pageNumber, pageSize));
 
         return result.Match(
-            value => Ok(_mapper.Map<List<ReceptionistProfileInfoResponse>>(value)),
+            value => Ok(value),
             errors => Problem(errors));
     }
 }

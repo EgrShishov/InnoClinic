@@ -1,5 +1,6 @@
-﻿public record SpecializationInfoResponse(
-    string SpecializationName,
-    string SpecializationStatus,
-    List<ServiceInfoResponse> relatedServices
-    );
+﻿public class SpecializationInfoResponse
+{
+    public string SpecializationName { get; init; }
+    public string SpecializationStatus {  get; init; }
+    public List<ServiceInfoResponse> RelatedServices {  get; init; }
+}

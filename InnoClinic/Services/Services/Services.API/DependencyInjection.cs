@@ -2,26 +2,11 @@
 {
     public static IServiceCollection AddPresentation(this IServiceCollection services)
     {
-        services.AddMassTransit(busConfigurator =>
-        {
-            busConfigurator.SetKebabCaseEndpointNameFormatter();
-
-            busConfigurator.AddConsumer<ServiceCreatedConsumer>();
-            busConfigurator.AddConsumer<ServiceStatusChangedConsumer>();
-            busConfigurator.AddConsumer<ServiceUpdatedConsumer>();
-
-            busConfigurator.UsingRabbitMq((context, configurator) =>
-            {
-                MessageBrokerSettings settings = context.GetRequiredService<MessageBrokerSettings>();
-                configurator.Host(new Uri(settings.Host), h =>
-                {
-                    h.Username(settings.Username);
-                    h.Password(settings.Password);
-                });
-
-                configurator.ConfigureEndpoints(context);
-            });
-        });
+        var config = new TypeAdapterConfig();
+        
+        services.AddSingleton(config);
+        
+        services.AddScoped<IMapper, ServiceMapper>();
 
         return services;
     }

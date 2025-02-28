@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\InnoClinic.Contracts\InnoClinic.Contracts.csproj" />
+	 <ProjectReference Include="..\..\..\Common\InnoClinic.Contracts\InnoClinic.Contracts.csproj" />
   </ItemGroup>
 
 </Project>

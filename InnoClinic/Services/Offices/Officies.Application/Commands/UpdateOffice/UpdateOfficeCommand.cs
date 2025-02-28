@@ -1,10 +1,12 @@
-﻿public sealed record UpdateOfficeCommand(
+﻿using Microsoft.AspNetCore.Http;
+
+public sealed record UpdateOfficeCommand(
     string OfficeId,
     string City,
     string Street,
     string HouseNumber,
     string OfficeNumber,
-    string PhotoId,
+    IFormFile? Photo,
     string RegistryPhoneNumber,
     bool IsActive) : IRequest<ErrorOr<Unit>>
 {

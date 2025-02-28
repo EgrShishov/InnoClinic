@@ -1,4 +1,5 @@
-﻿public class UpdatePatientCommandHandler(IUnitOfWork unitOfWork) : IRequestHandler<UpdatePatientCommand, ErrorOr<Patient>>
+﻿public class UpdatePatientCommandHandler(IUnitOfWork unitOfWork, IAccountHttpClient accountHttpClient) 
+    : IRequestHandler<UpdatePatientCommand, ErrorOr<Patient>>
 {
     public async Task<ErrorOr<Patient>> Handle(UpdatePatientCommand request, CancellationToken cancellationToken)
     {
@@ -7,16 +8,20 @@
         try
         {
             var patientProfile = await unitOfWork.PatientsRepository.GetPatientByIdAsync(request.PatientId);
-
-            if (patientProfile == null)
+            if (patientProfile is null)
             {
-                return Errors.Patients.NotFound;
+                return Errors.Patients.NotFound(request.PatientId);
+            }
+
+            var accountInfoResponse = await accountHttpClient.GetAccountInfo(patientProfile.AccountId);
+            if (accountInfoResponse.IsError)
+            {
+                return accountInfoResponse.FirstError;
             }
 
             patientProfile.FirstName = request.FirstName;
             patientProfile.LastName = request.LastName;
             patientProfile.MiddleName = request.MiddleName;
-            //patientProfile.PhoneNumber = request.PhoneNumber; where i can get phone number, if it in account
             patientProfile.DateOfBirth = request.DateOfBirth;
 
             await unitOfWork.PatientsRepository.UpdatePatientAsync(patientProfile);

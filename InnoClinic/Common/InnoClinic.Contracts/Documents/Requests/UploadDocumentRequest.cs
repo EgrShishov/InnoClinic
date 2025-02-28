@@ -1,3 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 
-public record UploadDocumentRequest(IFormFile file, int resultId);
+public class UploadDocumentRequest
+{
+    public IFormFile File { get; init; }
+    public int ResultId { get; init; }
+}

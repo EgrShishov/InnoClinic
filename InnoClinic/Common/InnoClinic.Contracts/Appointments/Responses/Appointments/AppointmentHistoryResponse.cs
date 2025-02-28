@@ -1,6 +1,8 @@
-﻿public record AppointmentHistoryResponse(
-    DateTime AppointmentDate,
-    TimeSpan AppointmentTime,
-    string DoctorFullName,
-    string ServiceName,
-    string LinkToMedicalResults);
+﻿public class AppointmentHistoryResponse
+{
+    public DateTime AppointmentDate {  get; init; }
+    public TimeSpan AppointmentTime {  get; init; }
+    public string DoctorFullName { get; init; }
+    public string ServiceName { get; init; }
+    public string LinkToMedicalResults { get; init; }
+}

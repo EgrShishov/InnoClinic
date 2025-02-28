@@ -1,39 +1,38 @@
-﻿public class DownloadAppointmentResultsQueryHandler(IUnitOfWork unitOfWork, IPDFDocumentGenerator documentGenerator)
-: IRequestHandler<DownloadAppointmentResultsQuery, ErrorOr<byte[]>>
+﻿using Microsoft.AspNetCore.Http;
+
+public class DownloadAppointmentResultsQueryHandler(
+    IUnitOfWork unitOfWork, 
+    IFilesHttpClient filesHttpClient) : IRequestHandler<DownloadAppointmentResultsQuery, ErrorOr<IFormFile>>
 {
-    public async Task<ErrorOr<byte[]>> Handle(DownloadAppointmentResultsQuery request, CancellationToken cancellationToken)
+    public async Task<ErrorOr<IFormFile>> Handle(DownloadAppointmentResultsQuery request, CancellationToken cancellationToken)
     {
         var results = await unitOfWork.ResultsRepository.GetResultsByIdAsync(request.ResultsId);
+
         if (results is null)
         {
             return Errors.Results.NotFound;
         }
 
-        DateTime dateOfBirth = DateTime.UtcNow;
-        string doctorsName = string.Empty;
-        string patientsName = string.Empty;
-        string servicesName = string.Empty;
-        string specialization = string.Empty;
+        var pdfResultsResponse = await filesHttpClient.GetDocumentForResultAsync(request.ResultsId);
 
-
-        var pdfRequest = new GeneratePDFResultsRequest
+        if (pdfResultsResponse.IsError)
         {
-            Date = results.Date,
-            DoctorName = doctorsName,
-            PatientName = patientsName,
-            DateOfBirth = dateOfBirth,
-            Complaints = results.Complaints,
-            Conclusion = results.Conclusion,
-            Recommendations = results.Recommendations,
-            ServiceName = servicesName,
-            Specialization = specialization
+            return pdfResultsResponse.FirstError;
+        }
+
+        var formFile = pdfResultsResponse.Value;
+
+        using var memoryStream = new MemoryStream();
+        await formFile.OpenReadStream().CopyToAsync(memoryStream);
+        memoryStream.Position = 0;
+
+        var updatedFormFile = new FormFile(memoryStream, 0, memoryStream.Length, formFile.Name, formFile.FileName)
+        {
+            Headers = formFile.Headers,
+            ContentType = formFile.ContentType,
+            ContentDisposition = formFile.ContentDisposition
         };
 
-        var appointmentResultsInPDF = documentGenerator.GenerateAppointmentResults(pdfRequest);
-        if (appointmentResultsInPDF is null)
-        {
-            return Error.Failure("Cannot generate PDF aapointments results");
-        }
-        return appointmentResultsInPDF;
+        return updatedFormFile;
     }
 }

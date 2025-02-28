@@ -1,1 +1,6 @@
-﻿public record SearchByNameRequest(string FirstName, string LastName, string MiddleName);
+﻿public class SearchByNameRequest
+{
+    public string FirstName { get; init; }
+    public string LastName { get; init; }
+    public string MiddleName { get; init; }
+}

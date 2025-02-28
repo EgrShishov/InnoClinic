@@ -12,12 +12,14 @@ public class ReceptionistRepository : IReceptionistRepository
     public async Task<Receptionist> AddReceptionistAsync(Receptionist receptionist, CancellationToken cancellationToken = default)
     {
         var newReceptionist = await _dbContext.Receptionists.AddAsync(receptionist);
+
         return newReceptionist.Entity;
     }
 
     public async Task DeleteReceptionistAsync(int id, CancellationToken cancellationToken = default)
     {
         var receptionist = await _dbContext.Receptionists.FirstOrDefaultAsync(r => r.Id == id);
+        
         if(receptionist != null)
         {
             _dbContext.Entry(receptionist).State = EntityState.Deleted;
@@ -54,6 +56,7 @@ public class ReceptionistRepository : IReceptionistRepository
     public Task<Receptionist> UpdateReceptionistAsync(Receptionist receptionist, CancellationToken cancellationToken = default)
     {
         _dbContext.Receptionists.Entry(receptionist).State = EntityState.Modified;
+
         return Task.FromResult(receptionist);
     }
 }

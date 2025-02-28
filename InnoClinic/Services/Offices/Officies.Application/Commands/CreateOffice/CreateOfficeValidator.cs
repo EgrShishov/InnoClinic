@@ -4,7 +4,7 @@
     public CreateOfficeValidator()
     {
         RuleFor(x => x.City)
-           .NotEmpty().WithMessage("Please, enter the office’s city");
+            .NotEmpty().WithMessage("Please, enter the office’s city");
 
         RuleFor(x => x.Street)
             .NotEmpty().WithMessage("Please, enter the office’s street");

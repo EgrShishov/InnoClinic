@@ -5,12 +5,24 @@
     {
         var specialization = new Specialization
         {
-            SpecializationName = request.SpecializatioName,
+            SpecializationName = request.SpecializationName,
             IsActive = request.IsActive
         };
+        
         var newSpecialization = await unitOfWork.Specializations.AddSpecializationAsync(specialization, cancellationToken);
+        
+        if (newSpecialization is null)
+        {
+            return Errors.Specialization.AddingError;
+        }
+
         await unitOfWork.SaveChangesAsync();
 
-        return new SpecializationResponse(specialization.Id, specialization.SpecializationName, specialization.IsActive);
+        return new SpecializationResponse
+        {
+            Id = specialization.Id,
+            SpecializationName = specialization.SpecializationName,
+            IsActive = specialization.IsActive
+        };
     }
 }

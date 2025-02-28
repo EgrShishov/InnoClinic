@@ -1,4 +1,5 @@
-﻿public class DeleteDoctorCommandHandler(IUnitOfWork unitOfWork) : IRequestHandler<DeleteDoctorCommand, ErrorOr<Unit>>
+﻿public class DeleteDoctorCommandHandler(IUnitOfWork unitOfWork, IAccountHttpClient accountHttpClient) 
+    : IRequestHandler<DeleteDoctorCommand, ErrorOr<Unit>>
 {
     public async Task<ErrorOr<Unit>> Handle(DeleteDoctorCommand request, CancellationToken cancellationToken)
     {
@@ -7,9 +8,17 @@
         try
         {
             var doctor = await unitOfWork.DoctorsRepository.GetDoctorByIdAsync(request.DoctorId);
-            if (doctor == null)
+            
+            if (doctor is null)
             {
-                return Errors.Doctors.NotFound;
+                return Errors.Doctors.NotFound(request.DoctorId);
+            }
+
+            var doctorsAccountDeletionResponse = await accountHttpClient.DeleteAccount(doctor.AccountId);
+            
+            if (doctorsAccountDeletionResponse.IsError)
+            {
+                return doctorsAccountDeletionResponse.FirstError;
             }
 
             await unitOfWork.DoctorsRepository.DeleteDoctorAsync(doctor.Id);
@@ -18,10 +27,10 @@
 
             return Unit.Value;
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             await unitOfWork.RollbackTransactionAsync(cancellationToken);
-            return Error.Failure("Failed to delete doctor", ex.Message);
+            throw;
         }
     }
 }

@@ -1,3 +1,5 @@
-﻿public sealed record DownloadAppointmentResultsQuery(int ResultsId) : IRequest<ErrorOr<byte[]>>
+﻿using Microsoft.AspNetCore.Http;
+
+public sealed record DownloadAppointmentResultsQuery(int ResultsId) : IRequest<ErrorOr<IFormFile>>
 {
 }

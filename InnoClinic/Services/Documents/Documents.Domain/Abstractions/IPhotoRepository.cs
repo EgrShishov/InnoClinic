@@ -1,6 +1,6 @@
 ﻿public interface IPhotoRepository
 {
-    public Task<Photo> GetPhotoByUrlAsync(string url);
+    public Task<Photo> GetPhotoAsync(string url);
     public Task SavePhotoAsync(Photo photo);
-    public Task DeletePhotoByUrlAsync(string url);
+    public Task DeletePhotoAsync(string url);
 }
