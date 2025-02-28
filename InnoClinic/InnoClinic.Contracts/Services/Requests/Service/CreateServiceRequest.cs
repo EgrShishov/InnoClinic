@@ -1,3 +1,0 @@
-﻿public sealed record CreateServiceRequest(
-
-    );

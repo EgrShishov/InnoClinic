@@ -1,2 +1,0 @@
-﻿public sealed record UpdateServiceInfoRequest(
-    );

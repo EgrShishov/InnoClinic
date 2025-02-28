@@ -1,0 +1,6 @@
+@Appointments.RMQHost_HostAddress = http://localhost:5011
+
+GET {{Appointments.RMQHost_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
